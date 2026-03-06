@@ -1,0 +1,72 @@
+# ====================
+# Node / Angular
+# ====================
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.sass-cache/
+frontend/.vscode/
+
+# ====================
+# Java / Maven
+# ====================
+backend/target/
+backend/.mvn/
+backend/*.jar
+backend/*.war
+
+# ====================
+# IDE
+# ====================
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# ====================
+# OS
+# ====================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ====================
+# Environment
+# ====================
+*.env
+*.env.local
+
+# ====================
+# Logs
+# ====================
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# ====================
+# Coverage
+# ====================
+frontend/coverage/
+backend/jacoco/
+
+# ====================
+# Binary / Reference Files
+# ====================
+*.pdf
+*.png
+UI1/
+UI2/
+
+# ====================
+# Extra docs (not for GitHub)
+# ====================
+TESTING_GUIDE.md
+GUIDE.md
+plan.md
+plan2.md
+frontend/README.md
+backend/GUIDE.md
+DOCKER.md
+backend/docker-compose.yml

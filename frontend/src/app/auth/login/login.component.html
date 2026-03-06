@@ -1,0 +1,80 @@
+<div class="min-vh-100 d-flex flex-column flex-lg-row">
+  <!-- Left Panel — Dark Blue Branding -->
+  <div class="col-lg-5 d-none d-lg-flex flex-column justify-content-center align-items-start px-5 text-white"
+       style="background: linear-gradient(135deg, #1E3A5F 0%, #2563EB 100%); position: relative; overflow: hidden;">
+    <h1 class="fw-bold mb-3" style="font-size: 2.5rem;">TaskFlow</h1>
+    <p class="fs-5 opacity-75 mb-0">Manage your tasks efficiently.<br>Welcome back!</p>
+
+    <div class="w-100" style="opacity:0.85; position: absolute; bottom: 5.5rem; left: 3rem; right: 3rem;">
+      <hr class="border-light mb-3" style="opacity:0.2;">
+      <p class="mb-1 small">
+        👨‍💻 Developer — <strong>Ankit</strong> (Ankitkumar341)
+      </p>
+      <div class="d-flex gap-3">
+        <a href="https://github.com/Ankitkumar341" target="_blank" class="text-white text-decoration-none small d-flex align-items-center gap-1" style="opacity:0.8;">
+          <i class="bi bi-github"></i> GitHub
+        </a>
+        <a href="https://linkedin.com/in/ankitkumar341" target="_blank" class="text-white text-decoration-none small d-flex align-items-center gap-1" style="opacity:0.8;">
+          <i class="bi bi-linkedin"></i> LinkedIn
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7 d-flex align-items-center justify-content-center px-3 py-5" style="background:var(--tf-surface);">
+    <div style="max-width: 400px; width: 100%;">
+      <h2 class="fw-bold mb-1" style="color: var(--tf-text);">Welcome Back</h2>
+      <p style="color:var(--tf-text-muted);" class="mb-4">Sign in to your TaskFlow account</p>
+
+      <!-- Error Alert -->
+      <div *ngIf="errorMessage" class="alert alert-danger d-flex align-items-center py-2" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span>{{ errorMessage }}</span>
+        <button type="button" class="btn-close ms-auto" style="font-size:0.65rem;" (click)="errorMessage = ''"></button>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+        <!-- Email -->
+        <div class="mb-3">
+          <label for="email" class="form-label fw-semibold text-uppercase small" style="color:var(--tf-text-muted); letter-spacing:0.05em;">Email Address</label>
+          <input type="email" class="form-control" id="email" name="email"
+                 [(ngModel)]="loginData.email" placeholder="you@example.com"
+                 required email #emailInput="ngModel"
+                 [class.is-invalid]="emailInput.touched && emailInput.invalid">
+          <div *ngIf="emailInput.touched && emailInput.invalid" class="invalid-feedback">
+            <span *ngIf="emailInput.errors?.['required']">Email is required.</span>
+            <span *ngIf="emailInput.errors?.['email']">Please enter a valid email.</span>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="mb-4">
+          <label for="password" class="form-label fw-semibold text-uppercase small" style="color:var(--tf-text-muted); letter-spacing:0.05em;">Password</label>
+          <div class="input-group">
+            <input [type]="showPassword ? 'text' : 'password'" class="form-control"
+                   id="password" name="password"
+                   [(ngModel)]="loginData.password" placeholder="Enter your password"
+                   required #passwordInput="ngModel"
+                   [class.is-invalid]="passwordInput.touched && passwordInput.invalid">
+            <button class="btn btn-outline-secondary border-start-0" type="button" (click)="togglePassword()" tabindex="-1">
+              <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </button>
+            <div *ngIf="passwordInput.touched && passwordInput.invalid" class="invalid-feedback">
+              Password is required.
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold" [disabled]="isLoading">
+          <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+          {{ isLoading ? 'Signing In...' : 'Sign In' }}
+        </button>
+      </form>
+
+      <p class="text-center text-muted mt-4 mb-0">
+        Don't have an account? <a routerLink="/register" class="fw-semibold text-primary text-decoration-none">Create one here</a>
+      </p>
+    </div>
+  </div>
+</div>

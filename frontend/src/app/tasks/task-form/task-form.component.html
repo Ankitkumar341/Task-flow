@@ -1,0 +1,191 @@
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+      <!-- Page Header -->
+      <div class="mb-4">
+        <a routerLink="/dashboard" class="text-decoration-none text-muted d-inline-flex align-items-center mb-2">
+          <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+        </a>
+        <h2 class="fw-bold">
+          <i [class]="isEditMode ? 'bi bi-pencil-square text-primary me-2' : 'bi bi-plus-circle text-primary me-2'"></i>
+          {{ pageTitle }}
+        </h2>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted mt-3">Loading task...</p>
+      </div>
+
+      <!-- Form Card -->
+      <div class="card border-0 shadow-sm rounded-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg" *ngIf="!isLoading">
+        <div class="card-body p-4 p-md-5">
+      
+          <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <span>{{ errorMessage }}</span>
+            <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Close"></button>
+          </div>
+
+          <!-- Task Form -->
+          <form (ngSubmit)="onSubmit()" #taskForm="ngForm">
+            <!-- Title -->
+            <div class="mb-3">
+              <label for="title" class="form-label fw-semibold">
+                <i class="bi bi-type me-1"></i> Title <span class="text-danger">*</span>
+              </label>
+              <input
+                type="text"
+                class="form-control form-control-lg"
+                id="title"
+                name="title"
+                [(ngModel)]="task.title"
+                placeholder="What needs to be done?"
+                required
+                maxlength="100"
+                #titleInput="ngModel"
+                [class.is-invalid]="titleInput.touched && titleInput.invalid">
+              <div *ngIf="titleInput.touched && titleInput.invalid" class="invalid-feedback">
+                Title is required.
+              </div>
+              <small class="text-muted">{{ task.title.length || 0 }}/100 characters</small>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-3">
+              <label for="description" class="form-label fw-semibold">
+                <i class="bi bi-text-paragraph me-1"></i> Description
+              </label>
+              <textarea
+                class="form-control resize-y min-h-[100px]"
+                id="description"
+                name="description"
+                [(ngModel)]="task.description"
+                placeholder="Add details about this task (optional)"
+                rows="4"
+                maxlength="500"></textarea>
+              <small class="text-muted">{{ task.description?.length || 0 }}/500 characters</small>
+            </div>
+
+            <!-- Status & Due Date Row -->
+            <div class="row mb-3">
+              <!-- Status -->
+              <div class="col-12 col-md-6 mb-3 mb-md-0">
+                <label for="status" class="form-label fw-semibold">
+                  <i class="bi bi-flag me-1"></i> Status
+                </label>
+                <select
+                  class="form-select form-select-lg"
+                  id="status"
+                  name="status"
+                  [(ngModel)]="task.status">
+                  <option *ngFor="let opt of statusOptions" [value]="opt.value">
+                    {{ opt.label }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Due Date -->
+              <div class="col-12 col-md-6">
+                <label for="dueDate" class="form-label fw-semibold">
+                  <i class="bi bi-calendar-event me-1"></i> Due Date <span class="text-danger">*</span>
+                </label>
+                <input
+                  type="date"
+                  class="form-control form-control-lg"
+                  id="dueDate"
+                  name="dueDate"
+                  [(ngModel)]="task.dueDate"
+                  required
+                  [attr.min]="isEditMode ? null : todayDate"
+                  #dueDateInput="ngModel"
+                  [class.is-invalid]="dueDateInput.touched && dueDateInput.invalid">
+                <div *ngIf="dueDateInput.touched && dueDateInput.invalid" class="invalid-feedback">
+                  Due date is required.
+                </div>
+              </div>
+            </div>
+
+            <!-- NEW fields highlighted in amber (F-EXT-02 + F-EXT-03) -->
+            <div class="tf-new-fields-highlight rounded-3 p-3 mb-4">
+              <div class="row">
+                <!-- Priority -->
+                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                  <label for="priority" class="form-label fw-semibold">
+                    <i class="bi bi-exclamation-circle me-1"></i> Priority
+                  </label>
+                  <select
+                    class="form-select form-select-lg"
+                    id="priority"
+                    name="priority"
+                    [(ngModel)]="task.priority">
+                    <option *ngFor="let opt of priorityOptions" [value]="opt.value">
+                      {{ opt.label }}
+                    </option>
+                  </select>
+                  <!-- Inline priority badge preview -->
+                  <div class="d-flex gap-1 mt-2">
+                    <span class="badge rounded-pill tf-priority-high" style="font-size:0.6rem;" [style.opacity]="task.priority === 'HIGH' ? '1' : '0.4'">HIGH</span>
+                    <span class="badge rounded-pill tf-priority-medium" style="font-size:0.6rem;" [style.opacity]="task.priority === 'MEDIUM' ? '1' : '0.4'">MEDIUM</span>
+                    <span class="badge rounded-pill tf-priority-low" style="font-size:0.6rem;" [style.opacity]="task.priority === 'LOW' ? '1' : '0.4'">LOW</span>
+                  </div>
+                </div>
+
+                <!-- Assign To -->
+                <div class="col-12 col-md-6">
+                  <label for="assignedTo" class="form-label fw-semibold">
+                    <i class="bi bi-person-plus me-1"></i> Assign To
+                  </label>
+                  <select
+                    class="form-select form-select-lg"
+                    id="assignedTo"
+                    name="assignedTo"
+                    [(ngModel)]="task.assignedToId">
+                    <option [ngValue]="null">— Unassigned —</option>
+                    <option *ngFor="let user of users" [ngValue]="user.id">{{ user.username }} · {{ user.email }}</option>
+                  </select>
+                  <!-- Avatar preview for selected assignee -->
+                  <div class="mt-2" *ngIf="task.assignedToId">
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle text-white fw-bold"
+                          style="width:28px;height:28px;font-size:0.7rem;background:linear-gradient(135deg,#3B82F6,#8B5CF6);">
+                      {{ getAssigneeInitial() }}
+                    </span>
+                    <small class="ms-1" style="color:var(--tf-text-muted);font-size:0.75rem;">{{ getSelectedAssigneeName() }}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-3">
+              <button
+                type="submit"
+                class="btn btn-primary btn-lg flex-fill fw-semibold"
+                [disabled]="isSaving">
+                <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                <i *ngIf="!isSaving" [class]="isEditMode ? 'bi bi-check-lg me-1' : 'bi bi-plus-circle me-1'"></i>
+                {{ isSaving ? 'Saving...' : (isEditMode ? 'Update Task' : 'Create Task') }}
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-secondary btn-lg"
+                (click)="cancel()">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Comments Section (only in edit mode) -->
+      <div *ngIf="isEditMode && taskId" class="card border-0 shadow-sm rounded-4 mt-4">
+        <div class="card-body p-4">
+          <app-comments [taskId]="taskId"></app-comments>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

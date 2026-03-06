@@ -1,0 +1,129 @@
+<div class="min-vh-100 d-flex flex-column flex-lg-row">
+  <div class="col-lg-5 d-none d-lg-flex flex-column justify-content-center align-items-start px-5 text-white"
+       style="background: linear-gradient(135deg, #1E3A5F 0%, #2563EB 100%); position: relative; overflow: hidden;">
+    <h1 class="fw-bold mb-3" style="font-size: 2.5rem;">TaskFlow</h1>
+    <p class="fs-5 opacity-75 mb-0"><br>building better workflows.</p>
+
+    <div class="w-100" style="opacity:0.85; position: absolute; bottom: 5.5rem; left: 3rem; right: 3rem;">
+      <hr class="border-light mb-3" style="opacity:0.2;">
+      <p class="mb-1 small">
+        👨‍💻 Developer — <strong>Ankit</strong> (Ankitkumar341)
+      </p>
+      <div class="d-flex gap-3">
+        <a href="https://github.com/Ankitkumar341" target="_blank" class="text-white text-decoration-none small d-flex align-items-center gap-1" style="opacity:0.8;">
+          <i class="bi bi-github"></i> GitHub
+        </a>
+        <a href="https://linkedin.com/in/ankitkumar341" target="_blank" class="text-white text-decoration-none small d-flex align-items-center gap-1" style="opacity:0.8;">
+          <i class="bi bi-linkedin"></i> LinkedIn
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7 d-flex align-items-center justify-content-center px-3 py-5" style="background:var(--tf-surface);">
+    <div style="max-width: 440px; width: 100%;">
+      <h2 class="fw-bold mb-1" style="color: var(--tf-text);">Create your Account</h2>
+      <p style="color:var(--tf-text-muted);" class="mb-4">It's free and only takes a minute</p>
+
+      <div *ngIf="successMessage" class="alert alert-success d-flex align-items-center py-2" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span>{{ successMessage }}</span>
+      </div>
+
+      <!-- Error Alert -->
+      <div *ngIf="errorMessage" class="alert alert-danger d-flex align-items-center py-2" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span>{{ errorMessage }}</span>
+        <button type="button" class="btn-close ms-auto" style="font-size:0.65rem;" (click)="errorMessage = ''"></button>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" #registerForm="ngForm">
+        <div class="mb-3">
+          <label for="username" class="form-label fw-semibold text-uppercase small" style="color:var(--tf-text-muted); letter-spacing:0.05em;">Full Name</label>
+          <input type="text" class="form-control" id="username" name="username"
+                 [(ngModel)]="registerData.username" placeholder="Alex Johnson"
+                 required minlength="3" maxlength="50"
+                 #usernameInput="ngModel"
+                 [class.is-invalid]="usernameInput.touched && usernameInput.invalid">
+          <div *ngIf="usernameInput.touched && usernameInput.invalid" class="invalid-feedback">
+            <span *ngIf="usernameInput.errors?.['required']">Full name is required.</span>
+            <span *ngIf="usernameInput.errors?.['minlength']">Must be at least 3 characters.</span>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+          <label for="email" class="form-label fw-semibold text-uppercase small" style="color:var(--tf-text-muted); letter-spacing:0.05em;">Email Address</label>
+          <input type="email" class="form-control" id="email" name="email"
+                 [(ngModel)]="registerData.email" placeholder="you@example.com"
+                 required email #emailInput="ngModel"
+                 [class.is-invalid]="emailInput.touched && emailInput.invalid">
+          <div *ngIf="emailInput.touched && emailInput.invalid" class="invalid-feedback">
+            <span *ngIf="emailInput.errors?.['required']">Email is required.</span>
+            <span *ngIf="emailInput.errors?.['email']">Please enter a valid email.</span>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="mb-3">
+          <label for="password" class="form-label fw-semibold text-uppercase small" style="color:var(--tf-text-muted); letter-spacing:0.05em;">Password</label>
+          <div class="input-group">
+            <input [type]="showPassword ? 'text' : 'password'" class="form-control"
+                   id="password" name="password"
+                   [(ngModel)]="registerData.password" placeholder="Min. 8 characters"
+                   required minlength="8" #passwordInput="ngModel"
+                   [class.is-invalid]="passwordInput.touched && passwordInput.invalid">
+            <button class="btn btn-outline-secondary border-start-0" type="button" (click)="togglePassword()" tabindex="-1">
+              <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </button>
+            <div *ngIf="passwordInput.touched && passwordInput.invalid" class="invalid-feedback">
+              <span *ngIf="passwordInput.errors?.['required']">Password is required.</span>
+              <span *ngIf="passwordInput.errors?.['minlength']">Must be at least 8 characters.</span>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-2 mt-2" *ngIf="registerData.password">
+            <span class="small text-muted">Password strength:</span>
+            <div class="d-flex gap-1 flex-grow-1">
+              <div class="rounded-1" style="height:5px;flex:1;" [style.background]="getPasswordStrength() >= 25 ? '#EF4444' : 'var(--tf-border)'"></div>
+              <div class="rounded-1" style="height:5px;flex:1;" [style.background]="getPasswordStrength() >= 50 ? '#F59E0B' : 'var(--tf-border)'"></div>
+              <div class="rounded-1" style="height:5px;flex:1;" [style.background]="getPasswordStrength() >= 75 ? '#F59E0B' : 'var(--tf-border)'"></div>
+              <div class="rounded-1" style="height:5px;flex:1;" [style.background]="getPasswordStrength() >= 100 ? '#22C55E' : 'var(--tf-border)'"></div>
+            </div>
+            <span class="small fw-semibold"
+                  [style.color]="getPasswordStrength() <= 25 ? '#EF4444' : getPasswordStrength() <= 75 ? '#F59E0B' : '#22C55E'">
+              {{ getPasswordStrength() <= 25 ? 'Weak' : getPasswordStrength() <= 75 ? 'Good' : 'Great' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="mb-3">
+          <label for="confirmPassword" class="form-label fw-semibold text-uppercase small" style="color:var(--tf-text-muted); letter-spacing:0.05em;">Confirm Password</label>
+          <div class="input-group">
+            <input [type]="showConfirmPassword ? 'text' : 'password'" class="form-control"
+                   id="confirmPassword" name="confirmPassword"
+                   [(ngModel)]="registerData.confirmPassword" placeholder="Re-enter password"
+                   required #confirmPasswordInput="ngModel"
+                   [class.is-invalid]="confirmPasswordInput.touched && registerData.password !== registerData.confirmPassword">
+            <button class="btn btn-outline-secondary border-start-0" type="button" (click)="toggleConfirmPassword()" tabindex="-1">
+              <i [class]="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </button>
+          </div>
+          <div *ngIf="confirmPasswordInput.touched && registerData.password !== registerData.confirmPassword" class="text-danger small mt-1">
+            <i class="bi bi-x-circle me-1"></i>Passwords do not match. Please try again.
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold mt-2" [disabled]="isLoading">
+          <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+          {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+        </button>
+      </form>
+
+      <p class="text-center text-muted mt-4 mb-0">
+        Already have an account? <a routerLink="/login" class="fw-semibold text-primary text-decoration-none">Sign in here</a>
+      </p>
+    </div>
+  </div>
+</div>

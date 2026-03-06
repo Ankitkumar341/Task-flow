@@ -1,0 +1,82 @@
+<nav class="navbar navbar-expand-lg navbar-dark shadow py-2 tf-navbar">
+  <div class="container-fluid px-4">
+    <a class="navbar-brand fw-bold d-flex align-items-center gap-2" routerLink="/" (click)="closeMenu()" style="font-size:1.3rem;">
+      <span class="d-inline-flex align-items-center justify-content-center rounded-2"
+            style="width:34px;height:34px;background:linear-gradient(135deg,#3B82F6,#8B5CF6);">
+        <i class="bi bi-check2-square text-white" style="font-size:1.1rem;"></i>
+      </span>
+      <span>TaskFlow</span>
+    </a>
+
+    <div class="d-flex align-items-center gap-2 ms-auto order-lg-2">
+      <button class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center tf-dark-toggle"
+              (click)="toggleDarkMode()" [title]="isDarkMode ? 'Light Mode' : 'Dark Mode'">
+        <i [class]="isDarkMode ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill text-white'" style="font-size:0.95rem;"></i>
+      </button>
+
+      <ng-container *ngIf="!isLoggedIn">
+        <a class="nav-link text-white d-none d-lg-inline-block px-2" routerLink="/login" routerLinkActive="active" (click)="closeMenu()">Login</a>
+        <a class="btn btn-sm px-3 py-1 fw-semibold d-none d-lg-inline-block"
+           style="background:linear-gradient(135deg,#3B82F6,#8B5CF6);color:#fff;border:none;border-radius:20px;"
+           routerLink="/register" (click)="closeMenu()">Register</a>
+      </ng-container>
+
+      <ng-container *ngIf="isLoggedIn">
+        <div class="position-relative">
+          <button class="btn btn-sm d-flex align-items-center gap-2 px-2 py-1 rounded-pill"
+                  style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;"
+                  (click)="toggleUserDropdown()" type="button">
+            <span class="d-inline-flex align-items-center justify-content-center rounded-circle text-white fw-bold"
+                  style="width:30px;height:30px;background:linear-gradient(135deg,#3B82F6,#8B5CF6);font-size:0.8rem;">
+              {{ (currentUser?.username || 'U').charAt(0).toUpperCase() }}
+            </span>
+            <span class="fw-semibold d-none d-sm-inline small">{{ currentUser?.username || 'User' }}</span>
+            <i class="bi bi-chevron-down" style="font-size:0.7rem;"></i>
+          </button>
+
+          <div class="position-absolute end-0 mt-2 rounded-3 shadow-lg py-1 tf-dropdown"
+               *ngIf="isUserDropdownOpen" style="min-width:200px;z-index:1060;">
+            <div class="px-3 py-2 border-bottom" style="border-color:var(--tf-border)!important;">
+              <div class="fw-bold small" style="color:var(--tf-text);">{{ currentUser?.username || 'User' }}</div>
+              <div style="font-size:0.75rem;color:var(--tf-text-muted);">{{ currentUser?.email || '' }}</div>
+            </div>
+            <a class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 small tf-dropdown-item"
+               routerLink="/dashboard" (click)="closeDropdowns()">
+              <i class="bi bi-grid-1x2"></i> Dashboard
+            </a>
+            <hr class="my-1" style="border-color:var(--tf-border);">
+            <button class="dropdown-item d-flex align-items-center gap-2 px-3 py-2 small text-danger tf-dropdown-item"
+                    (click)="logout(); closeDropdowns()">
+              <i class="bi bi-box-arrow-right"></i> Sign Out
+            </button>
+          </div>
+        </div>
+      </ng-container>
+
+      <button class="navbar-toggler border-0 d-lg-none ms-1" type="button"
+              (click)="toggleMenu()" [attr.aria-expanded]="isMenuOpen" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    </div>
+
+    <div class="collapse navbar-collapse order-lg-1" [class.show]="isMenuOpen">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item" *ngIf="isLoggedIn">
+          <a class="nav-link d-flex align-items-center gap-1" routerLink="/dashboard" routerLinkActive="active" (click)="closeMenu()">
+            <i class="bi bi-grid-1x2"></i> Dashboard
+          </a>
+        </li>
+      </ul>
+      <ul class="navbar-nav d-lg-none mb-2" *ngIf="!isLoggedIn">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/login" routerLinkActive="active" (click)="closeMenu()">Login</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/register" routerLinkActive="active" (click)="closeMenu()">Register</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div *ngIf="isUserDropdownOpen" class="position-fixed top-0 start-0 w-100 h-100" style="z-index:1050;" (click)="closeDropdowns()"></div>
+</nav>
