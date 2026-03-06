@@ -5,8 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.taskflow.dto.CommentRequest;
 import com.taskflow.dto.RegisterRequest;
 import com.taskflow.dto.TaskDTO;
+import com.taskflow.model.Role;
 import com.taskflow.model.TaskPriority;
 import com.taskflow.model.TaskStatus;
+import com.taskflow.model.User;
 import com.taskflow.repository.ActivityLogRepository;
 import com.taskflow.repository.TaskCommentRepository;
 import com.taskflow.repository.TaskRepository;
@@ -48,6 +50,10 @@ class ExpansionFeatureTests {
         taskRepository.deleteAll();
         userRepository.deleteAll();
         token = AuthControllerTests.registerAndGetToken(mockMvc, objectMapper);
+        // Make test user a MANAGER so they can assign tasks
+        User testUser = userRepository.findByEmail("testuser@example.com").orElseThrow();
+        testUser.setRole(Role.MANAGER);
+        userRepository.save(testUser);
     }
 
     // F-EXT-01: TASK COMMENTS
@@ -136,12 +142,12 @@ class ExpansionFeatureTests {
     @Order(6)
     @DisplayName("TC-A01: Create task with assignee → name shown")
     void createTaskWithAssignee() throws Exception {
-        Long userId = getUserId();
+        Long devUserId = createDeveloperUser();
 
         TaskDTO task = TaskDTO.builder()
                 .title("Assigned Task")
                 .dueDate(LocalDate.now().plusDays(5))
-                .assignedToId(userId)
+                .assignedToId(devUserId)
                 .build();
 
         mockMvc.perform(post("/api/tasks")
@@ -149,8 +155,8 @@ class ExpansionFeatureTests {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(task)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.assignedToId").value(userId))
-                .andExpect(jsonPath("$.assignedToName").value("TestUser"));
+                .andExpect(jsonPath("$.assignedToId").value(devUserId))
+                .andExpect(jsonPath("$.assignedToName").value("DevUser"));
     }
 
     @Test
@@ -175,10 +181,18 @@ class ExpansionFeatureTests {
     @Order(8)
     @DisplayName("TC-A04: Assigned to Me filter")
     void assignedToMeFilter() throws Exception {
-        Long userId = getUserId();
+        // Register a DEVELOPER user and get their token + id
+        RegisterRequest devReq = RegisterRequest.builder()
+                .username("DevUser").email("dev@example.com").password("password123").build();
+        MvcResult devResult = mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(devReq)))
+                .andExpect(status().isCreated()).andReturn();
+        String devToken = objectMapper.readTree(devResult.getResponse().getContentAsString()).get("token").asText();
+        Long devUserId = userRepository.findByEmail("dev@example.com").orElseThrow().getId();
 
-        // Create one assigned and one unassigned
-        TaskDTO assigned = TaskDTO.builder().title("Mine").dueDate(LocalDate.now().plusDays(1)).assignedToId(userId).build();
+        // MANAGER creates one task assigned to developer and one unassigned
+        TaskDTO assigned = TaskDTO.builder().title("Mine").dueDate(LocalDate.now().plusDays(1)).assignedToId(devUserId).build();
         TaskDTO unassigned = TaskDTO.builder().title("Not mine").dueDate(LocalDate.now().plusDays(1)).build();
 
         mockMvc.perform(post("/api/tasks").header("Authorization", "Bearer " + token)
@@ -188,8 +202,9 @@ class ExpansionFeatureTests {
                 .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(unassigned)))
                 .andExpect(status().isCreated());
 
+        // Developer checks tasks assigned to them
         mockMvc.perform(get("/api/tasks/assigned-to-me")
-                        .header("Authorization", "Bearer " + token))
+                        .header("Authorization", "Bearer " + devToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].title").value("Mine"));
@@ -490,11 +505,13 @@ class ExpansionFeatureTests {
         return objectMapper.readTree(res.getResponse().getContentAsString()).get("token").asText();
     }
 
-    private Long getUserId() throws Exception {
-        MvcResult res = mockMvc.perform(get("/api/users")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk()).andReturn();
-        JsonNode users = objectMapper.readTree(res.getResponse().getContentAsString());
-        return users.get(0).get("id").asLong();
+    private Long createDeveloperUser() throws Exception {
+        RegisterRequest req = RegisterRequest.builder()
+                .username("DevUser").email("dev@example.com").password("password123").build();
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isCreated());
+        return userRepository.findByEmail("dev@example.com").orElseThrow().getId();
     }
 }
