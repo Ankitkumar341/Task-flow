@@ -35,6 +35,18 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private Role role = Role.DEVELOPER;
+
+    @Column(name = "role_change_count", nullable = false)
+    @Builder.Default
+    private int roleChangeCount = 0;
+
+    @Column(name = "last_role_change_at")
+    private LocalDateTime lastRoleChangeAt;
+
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
