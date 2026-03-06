@@ -2,14 +2,18 @@ export interface User {
   id?: number;
   username: string;
   email: string;
+  role?: string;
   createdAt?: string;
   updatedAt?: string;
 }
+
+export type UserRole = 'ADMIN' | 'MANAGER' | 'DEVELOPER' | 'TESTER';
 
 export interface RegisterRequest {
   username: string;
   email: string;
   password: string;
+  role?: string;
 }
 
 export interface LoginRequest {
@@ -23,4 +27,5 @@ export interface AuthResponse {
   id?: number;
   username?: string;
   email?: string;
+  role?: string;
 }

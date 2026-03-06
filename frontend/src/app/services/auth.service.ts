@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../environments/environment';
-import { AuthResponse, LoginRequest, RegisterRequest, User } from '../models/user.model';
+import { AuthResponse, LoginRequest, RegisterRequest, User, UserRole } from '../models/user.model';
 
 const AUTH_API = `${environment.apiUrl}/auth`;
 const TOKEN_KEY = 'auth_token';
@@ -37,7 +37,8 @@ export class AuthService {
         const user: User = {
           id: response.id,
           username: response.username || '',
-          email: response.email || ''
+          email: response.email || '',
+          role: response.role || 'DEVELOPER'
         };
         this.storeUser(user);
         this.currentUserSubject.next(user);
@@ -56,6 +57,16 @@ export class AuthService {
 
   getToken(): string | null {
     return localStorage.getItem(TOKEN_KEY);
+  }
+
+  getUserRole(): UserRole {
+    const user = this.getCurrentUser();
+    return (user?.role as UserRole) || 'DEVELOPER';
+  }
+
+  isAdminOrManager(): boolean {
+    const role = this.getUserRole();
+    return role === 'ADMIN' || role === 'MANAGER';
   }
 
   isAuthenticated(): boolean {
