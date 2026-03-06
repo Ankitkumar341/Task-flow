@@ -1,11 +1,15 @@
 
 CREATE TABLE IF NOT EXISTS users (
-    id          BIGSERIAL PRIMARY KEY,
-    username    VARCHAR(50)  NOT NULL UNIQUE,
-    email       VARCHAR(100) NOT NULL UNIQUE,
-    password    VARCHAR(255) NOT NULL,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id                    BIGSERIAL PRIMARY KEY,
+    username              VARCHAR(50)  NOT NULL UNIQUE,
+    email                 VARCHAR(100) NOT NULL UNIQUE,
+    password              VARCHAR(255) NOT NULL,
+    role                  VARCHAR(20)  NOT NULL DEFAULT 'DEVELOPER',
+    role_change_count     INT          NOT NULL DEFAULT 0,
+    last_role_change_at   TIMESTAMP,
+    created_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT chk_role CHECK (role IN ('ADMIN','MANAGER','DEVELOPER','TESTER'))
 );
 
 --Tasks Table (extended: assigned_to, priority
