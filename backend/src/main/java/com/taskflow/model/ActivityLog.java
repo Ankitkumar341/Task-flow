@@ -2,6 +2,8 @@ package com.taskflow.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -20,10 +22,12 @@ public class ActivityLog {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Task task;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actor_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User actor;
 
     @Column(name = "action_code", nullable = false, length = 50)

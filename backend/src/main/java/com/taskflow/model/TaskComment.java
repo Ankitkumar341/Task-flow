@@ -3,6 +3,8 @@ package com.taskflow.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -21,10 +23,12 @@ public class TaskComment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Task task;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User author;
 
     @NotBlank(message = "Comment body is required")

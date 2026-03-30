@@ -36,13 +36,26 @@ public class User {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20, columnDefinition = "varchar(20) default 'DEVELOPER'")
+    @Column(nullable = false, length = 20)
     @Builder.Default
-    private Role role = Role.DEVELOPER;
+    private Role role = Role.MEMBER;
 
-    @Column(name = "role_change_count", nullable = false, columnDefinition = "int default 0")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "member_type", nullable = false, length = 20)
+    @Builder.Default
+    private MemberType memberType = MemberType.DEVELOPER;
+
+    @Column(name = "is_active", nullable = false)
+    @Builder.Default
+    private boolean isActive = true;
+
+    @Column(name = "role_change_count", nullable = false)
     @Builder.Default
     private int roleChangeCount = 0;
+
+    @Column(name = "is_email_verified", nullable = false)
+    @Builder.Default
+    private boolean isEmailVerified = false;
 
     @Column(name = "last_role_change_at")
     private LocalDateTime lastRoleChangeAt;
