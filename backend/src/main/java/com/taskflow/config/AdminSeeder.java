@@ -39,6 +39,7 @@ public class AdminSeeder implements CommandLineRunner {
                     .email(ADMIN_EMAIL)
                     .password(passwordEncoder.encode(adminPassword))
                     .role(Role.ADMIN)
+                    .isEmailVerified(true)
                     .roleChangeCount(0)
                     .build();
             userRepository.save(admin);
@@ -48,6 +49,7 @@ public class AdminSeeder implements CommandLineRunner {
             User admin = existing.get();
             admin.setPassword(passwordEncoder.encode(adminPassword));
             admin.setRole(Role.ADMIN);
+            admin.setEmailVerified(true);
             userRepository.save(admin);
             logger.info("ADMIN password synced from env variable: {}", ADMIN_EMAIL);
         }

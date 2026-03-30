@@ -40,18 +40,45 @@ public class JwtTokenProvider {
         return generateTokenFromUsername(userDetails.getUsername(), role);
     }
 
-// Generate JWT token from username + role
-    public String generateTokenFromUsername(String username, String role) {
+// Generate JWT token from username + role + optional extra claims
+    public String generateTokenFromUsername(String username, String role, Long userId, String fullName, String jti) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
-        return Jwts.builder()
+        JwtBuilder builder = Jwts.builder()
                 .subject(username)
                 .claim("role", role)
+                .id(jti)
                 .issuedAt(now)
                 .expiration(expiryDate)
-                .signWith(getSigningKey())
-                .compact();
+                .signWith(getSigningKey());
+
+        if (userId != null) {
+            builder.claim("userId", userId);
+        }
+        if (fullName != null) {
+            builder.claim("fullName", fullName);
+        }
+
+        return builder.compact();
+    }
+
+    public String generateTokenFromUsername(String username, String role, Long userId, String fullName) {
+        return generateTokenFromUsername(username, role, userId, fullName, java.util.UUID.randomUUID().toString());
+    }
+
+    public String getJtiFromToken(String token) {
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getId();
+    }
+
+    // Generate JWT token from username + role
+    public String generateTokenFromUsername(String username, String role) {
+        return generateTokenFromUsername(username, role, null, null);
     }
 
     // Backward-compat overload (defaults to DEVELOPER)

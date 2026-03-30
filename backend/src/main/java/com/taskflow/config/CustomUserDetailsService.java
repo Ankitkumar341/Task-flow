@@ -21,10 +21,15 @@ public class CustomUserDetailsService implements UserDetailsService {
     //  Spring Security calls this method during authentication.
      
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
+    public UserDetails loadUserByUsername(String input) throws UsernameNotFoundException {
+        // Allow login using either email or username
+        User user = userRepository.findByUsernameOrEmail(input, input)
                 .orElseThrow(() -> new UsernameNotFoundException(
-                        "User not found with email: " + email));
+                        "User not found with identifier: " + input));
+
+        if (!user.isActive()) {
+            throw new UsernameNotFoundException("User account is deactivated");
+        }
 
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
