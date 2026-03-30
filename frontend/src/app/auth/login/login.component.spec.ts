@@ -3,8 +3,12 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
+import { Component } from '@angular/core';
 import { LoginComponent } from './login.component';
 import { AuthService } from '../../services/auth.service';
+
+@Component({ template: '' })
+class DummyComponent {}
 
 describe('LoginComponent', () => {
   let component: LoginComponent;
@@ -15,7 +19,15 @@ describe('LoginComponent', () => {
     authServiceSpy = jasmine.createSpyObj('AuthService', ['login']);
 
     await TestBed.configureTestingModule({
-      imports: [LoginComponent, HttpClientTestingModule, RouterTestingModule, FormsModule],
+      imports: [
+        LoginComponent, 
+        HttpClientTestingModule, 
+        RouterTestingModule.withRoutes([
+          { path: '**', component: DummyComponent }
+        ]), 
+        FormsModule
+      ],
+      declarations: [DummyComponent],
       providers: [
         { provide: AuthService, useValue: authServiceSpy }
       ]
@@ -41,10 +53,10 @@ describe('LoginComponent', () => {
   });
 
   it('should show error for invalid email format', () => {
-    component.loginData.email = 'not-an-email';
+    component.loginData.email = 'no'; // Length < 3 -> fails identifier check
     component.loginData.password = 'Pass1234';
     component.onSubmit();
-    expect(component.errorMessage).toBe('Please enter a valid email address.');
+    expect(component.errorMessage).toBe('Please enter a valid email or username.');
   });
 
   it('should call AuthService.login with valid credentials', () => {

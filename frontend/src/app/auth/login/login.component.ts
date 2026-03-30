@@ -43,8 +43,8 @@ export class LoginComponent {
       return;
     }
 
-    if (!this.isValidEmail(this.loginData.email)) {
-      this.errorMessage = 'Please enter a valid email address.';
+    if (!this.isValidIdentifier(this.loginData.email)) {
+      this.errorMessage = 'Please enter a valid email or username.';
       return;
     }
 
@@ -58,26 +58,56 @@ export class LoginComponent {
       },
       error: (err) => {
         this.isLoading = false;
-        if (err.status === 401 || err.status === 400) {
+        
+        const errorMsg = err.error?.message || '';
+        
+        if (errorMsg === 'USER_NOT_FOUND') {
+          this.errorMessage = 'No account found with this email. Please sign up first.';
+          this.toastService.warning('Account not found. Trying to log in? Create an account first!');
+          return;
+        }
+
+        if (errorMsg.includes('verification') || err.message === 'VERIFY_REQUIRED') {
+          this.toastService.warning('Email not verified. Please check your inbox.');
+          this.router.navigate(['/verify-email'], { state: { email: this.loginData.email } });
+          return;
+        }
+
+        if (err.status === 401 || err.status === 400 || err.code === 'auth/invalid-credential') {
           this.errorMessage = 'Invalid email or password. Please try again.';
           this.toastService.error('Invalid email or password.');
         } else if (err.status === 0) {
           this.errorMessage = 'Unable to connect to server. Please check your connection.';
           this.toastService.error('Unable to connect to server.');
         } else {
-          this.errorMessage = err.error?.message || 'An unexpected error occurred. Please try again.';
+          this.errorMessage = errorMsg || 'An unexpected error occurred. Please try again.';
           this.toastService.error('Login failed. Please try again.');
         }
       }
     });
   }
 
+  onOtpLogin(): void {
+    // OTP login disabled in favor of Firebase Link Verification
+    this.toastService.info('Please use standard login. Email verification is mandatory.');
+  }
+
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
 
-  private isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+  private isValidIdentifier(value: string): boolean {
+    if (!value || !value.trim()) return false;
+
+    const trimmed = value.trim();
+
+    // Accept username or email
+    if (trimmed.includes('@')) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(trimmed);
+    }
+
+    // Username must be at least 3 chars and contain no spaces
+    return trimmed.length >= 3 && !/\s/.test(trimmed);
   }
 }

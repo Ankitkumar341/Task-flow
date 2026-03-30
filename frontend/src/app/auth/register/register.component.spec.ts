@@ -3,21 +3,37 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
+import { Component } from '@angular/core';
 import { RegisterComponent } from './register.component';
 import { AuthService } from '../../services/auth.service';
+import { ToastService } from '../../services/toast.service';
+
+@Component({ template: '' })
+class DummyComponent {}
 
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
   let authServiceSpy: jasmine.SpyObj<AuthService>;
+  let toastSpy: jasmine.SpyObj<ToastService>;
 
   beforeEach(async () => {
     authServiceSpy = jasmine.createSpyObj('AuthService', ['register']);
+    toastSpy = jasmine.createSpyObj('ToastService', ['success', 'error', 'info', 'warning']);
 
     await TestBed.configureTestingModule({
-      imports: [RegisterComponent, HttpClientTestingModule, RouterTestingModule, FormsModule],
+      imports: [
+        RegisterComponent, 
+        HttpClientTestingModule, 
+        RouterTestingModule.withRoutes([
+          { path: '**', component: DummyComponent }
+        ]), 
+        FormsModule
+      ],
+      declarations: [DummyComponent],
       providers: [
-        { provide: AuthService, useValue: authServiceSpy }
+        { provide: AuthService, useValue: authServiceSpy },
+        { provide: ToastService, useValue: toastSpy }
       ]
     }).compileComponents();
 
@@ -80,7 +96,7 @@ describe('RegisterComponent', () => {
     component.registerData = { username: 'John', email: 'john@test.com', password: 'Pass1234', confirmPassword: 'Pass1234', role: 'DEVELOPER' };
     component.onSubmit();
 
-    expect(component.successMessage).toContain('Registration successful');
+    expect(toastSpy.success).toHaveBeenCalledWith(jasmine.stringMatching(/Account created/));
     expect(component.isLoading).toBeFalse();
   });
 

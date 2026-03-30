@@ -72,11 +72,8 @@ export class RegisterComponent {
     this.authService.register(request).subscribe({
       next: () => {
         this.isLoading = false;
-        this.successMessage = 'Registration successful! Redirecting to login...';
-        this.toastService.success('Account created successfully! Redirecting...');
-        setTimeout(() => {
-          this.router.navigate(['/login']);
-        }, 2000);
+        this.toastService.success('Account created! Please verify your email via the link sent.');
+        this.router.navigate(['/verify-email'], { state: { email: request.email } });
       },
       error: (err) => {
         this.isLoading = false;
