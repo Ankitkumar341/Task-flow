@@ -26,12 +26,10 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
   private chartsInitialized = false;
 
   get dueTodayCount(): number {
-    // Calculated from statusCounts if available; otherwise show pendingTasks as fallback
     return this.summary?.pendingTasks ?? 0;
   }
 
   get thisWeekCount(): number {
-    // Show inProgressTasks as approximate for "this week" since backend doesn't have dedicated field
     return this.summary?.inProgressTasks ?? 0;
   }
 
@@ -59,7 +57,6 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = true;
     this.analyticsService.getSummary().subscribe({
       next: (data) => {
-        // Build statusCounts / priorityCounts maps from individual fields if not present
         if (!data.statusCounts) {
           data.statusCounts = {
             'PENDING': (data as any).pendingTasks || 0,
@@ -76,7 +73,6 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         this.summary = data;
         this.isLoading = false;
-        // Small delay so the canvas elements are rendered
         setTimeout(() => this.renderCharts(), 150);
       },
       error: () => {
@@ -109,6 +105,8 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
     const values = Object.values(sc);
     const colors = Object.keys(sc).map(k => this.getStatusColor(k));
 
+    const isMobile = window.innerWidth < 768;
+
     this.statusChart = new Chart(ctx, {
       type: 'doughnut',
       data: {
@@ -125,13 +123,13 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            position: 'right',
+            position: isMobile ? 'bottom' : 'right',
             labels: {
               color: this.getTextColor(),
-              padding: 12,
+              padding: isMobile ? 8 : 12,
               usePointStyle: true,
               pointStyleWidth: 10,
-              font: { size: 11 }
+              font: { size: 10 }
             }
           }
         },
@@ -245,5 +243,13 @@ export class AnalyticsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get completionRate(): number {
     return this.summary?.completionRate ?? 0;
+  }
+
+  getStatusPercent(status: string): number {
+    if (!this.summary || !this.summary.statusCounts) return 0;
+    const counts = this.summary.statusCounts;
+    const total = Object.values(counts).reduce((a, b) => a + (b as number), 0);
+    if (total === 0) return 0;
+    return ((counts[status] || 0) / total) * 100;
   }
 }

@@ -1,94 +1,93 @@
-<!-- Analytics Panel (F-EXT-04) -->
-<div class="tf-analytics-panel mb-4">
-  <!-- Toggle Button (when collapsed) -->
-  <button *ngIf="isCollapsed" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2"
-          (click)="togglePanel()">
-    <i class="bi bi-bar-chart-line"></i>
-    Show Analytics
-  </button>
-
-  <!-- Expanded Panel -->
-  <div *ngIf="!isCollapsed" class="tf-analytics-content">
-    <!-- Header Row -->
-    <div class="d-flex align-items-center justify-content-between mb-3">
-      <h5 class="fw-bold mb-0" style="color:var(--tf-text);">
-        <i class="bi bi-bar-chart-line me-2" style="color:var(--tf-accent);"></i>Analytics Overview
-      </h5>
-      <button class="btn btn-outline-primary btn-sm" (click)="togglePanel()">
-        <i class="bi bi-chevron-up me-1"></i> Hide Analytics
+<div class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm">
+  <!-- Header / Toggle -->
+  <div class="px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-colors" (click)="togglePanel()">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center text-blue-600 dark:text-blue-400">
+        <i class="bi bi-graph-up-arrow text-xl"></i>
+      </div>
+      <div>
+        <h3 class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-tight">Performance Analytics</h3>
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ isCollapsed ? 'View insights' : 'Real-time overview' }}</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-4">
+      <button *ngIf="!isCollapsed" (click)="$event.stopPropagation(); refreshData()" class="p-2 hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg transition-all text-slate-400">
+        <i class="bi bi-arrow-clockwise text-lg"></i>
       </button>
-    </div>
-
-    <!-- Loading -->
-    <div *ngIf="isLoading" class="text-center py-4">
-      <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading analytics...</span>
-      </div>
-      <p class="text-muted small mt-2 mb-0">Loading analytics data...</p>
-    </div>
-
-    <!-- Analytics Data -->
-    <div *ngIf="!isLoading && summary">
-      <!-- 5 KPI Cards Row -->
-      <div class="row g-3 mb-4">
-        <div class="col-6 col-md">
-          <div class="tf-kpi-card text-center p-3 rounded-3">
-            <div class="tf-kpi-accent tf-kpi-accent-green"></div>
-            <div class="fw-bold fs-3" style="color:var(--tf-text);">{{ completionRate }}%</div>
-            <div class="text-muted small">Completion Rate</div>
-          </div>
-        </div>
-        <div class="col-6 col-md">
-          <div class="tf-kpi-card text-center p-3 rounded-3">
-            <div class="tf-kpi-accent tf-kpi-accent-red"></div>
-            <div class="fw-bold fs-3" style="color:var(--tf-text);">{{ summary.overdueTasks }}</div>
-            <div class="text-muted small">Overdue Tasks</div>
-          </div>
-        </div>
-        <div class="col-6 col-md">
-          <div class="tf-kpi-card text-center p-3 rounded-3">
-            <div class="tf-kpi-accent tf-kpi-accent-amber"></div>
-            <div class="fw-bold fs-3" style="color:var(--tf-text);">{{ dueTodayCount }}</div>
-            <div class="text-muted small">Due Today</div>
-          </div>
-        </div>
-        <div class="col-6 col-md">
-          <div class="tf-kpi-card text-center p-3 rounded-3">
-            <div class="tf-kpi-accent tf-kpi-accent-purple"></div>
-            <div class="fw-bold fs-3" style="color:var(--tf-text);">{{ thisWeekCount }}</div>
-            <div class="text-muted small">This Week</div>
-          </div>
-        </div>
-        <div class="col-6 col-md">
-          <div class="tf-kpi-card text-center p-3 rounded-3">
-            <div class="tf-kpi-accent tf-kpi-accent-blue"></div>
-            <div class="fw-bold fs-3" style="color:var(--tf-text);">{{ summary.totalTasks }}</div>
-            <div class="text-muted small">Total Tasks</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Charts Row -->
-      <div class="row g-3">
-        <div class="col-md-6">
-          <div class="tf-chart-card p-3 rounded-3">
-            <h6 class="fw-bold small mb-3" style="color:var(--tf-text);">Task Status Breakdown</h6>
-            <canvas #statusChart style="max-height: 260px;"></canvas>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="tf-chart-card p-3 rounded-3">
-            <h6 class="fw-bold small mb-3" style="color:var(--tf-text);">Tasks by Priority</h6>
-            <canvas #priorityChart style="max-height: 260px;"></canvas>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- No data state -->
-    <div *ngIf="!isLoading && !summary" class="text-center text-muted py-4">
-      <i class="bi bi-bar-chart-line d-block mb-2" style="font-size:2rem;"></i>
-      No data yet. Create some tasks to see analytics.
+      <i class="bi" [class.bi-chevron-down]="isCollapsed" [class.bi-chevron-up]="!isCollapsed"></i>
     </div>
   </div>
+
+  <!-- Content -->
+  <div *ngIf="!isCollapsed" class="p-6 border-t border-slate-100 dark:border-white/5 animate-in slide-in-from-top-2 duration-300">
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="py-12 flex flex-col items-center justify-center space-y-4">
+      <div class="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+      <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Aggregating Data...</p>
+    </div>
+
+    <ng-container *ngIf="!isLoading && summary">
+      <!-- Top Row: Summary Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="p-5 rounded-2xl bg-blue-50/50 dark:bg-blue-500/5 border border-blue-100 dark:border-blue-500/10">
+          <p class="text-[10px] font-bold text-blue-600/60 dark:text-blue-400/60 uppercase tracking-widest mb-1 px-1">Success Rate</p>
+          <div class="flex items-baseline gap-2">
+            <span class="text-3xl font-black text-slate-800 dark:text-white">{{ (summary.completionRate || 0) | number:'1.0-0' }}%</span>
+            <i class="bi bi-arrow-up-right text-green-500 text-sm"></i>
+          </div>
+        </div>
+        <div class="p-5 rounded-2xl bg-amber-50/50 dark:bg-amber-500/5 border border-amber-100 dark:border-amber-500/10">
+           <p class="text-[10px] font-bold text-amber-600/60 dark:text-amber-400/60 uppercase tracking-widest mb-1 px-1">Due Today</p>
+           <div class="flex items-baseline gap-2">
+             <span class="text-3xl font-black text-slate-800 dark:text-white">{{ dueTodayCount }}</span>
+             <span class="text-[10px] font-bold text-amber-600/60">tasks</span>
+           </div>
+        </div>
+        <div class="p-5 rounded-2xl bg-purple-50/50 dark:bg-purple-500/5 border border-purple-100 dark:border-purple-500/10">
+           <p class="text-[10px] font-bold text-purple-600/60 dark:text-purple-400/60 uppercase tracking-widest mb-1 px-1">Active Now</p>
+           <div class="flex items-baseline gap-2">
+             <span class="text-3xl font-black text-slate-800 dark:text-white">{{ thisWeekCount }}</span>
+             <span class="text-[10px] font-bold text-purple-600/60">in progress</span>
+           </div>
+        </div>
+        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+           <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 px-1">Workload</p>
+           <div class="flex items-baseline gap-2">
+             <span class="text-3xl font-black text-slate-800 dark:text-white">{{ summary.totalTasks }}</span>
+             <span class="text-[10px] font-bold text-slate-400">total</span>
+           </div>
+        </div>
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Status Chart -->
+        <div class="space-y-4">
+          <div class="px-1 flex justify-between items-center">
+            <h4 class="text-xs font-black text-slate-800 dark:text-white uppercase tracking-wider">Status Distribution</h4>
+            <div class="flex gap-1.5 h-1 w-24 bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden">
+               <div class="bg-blue-500 h-full" [style.width.%]="getStatusPercent('PENDING')"></div>
+               <div class="bg-amber-500 h-full" [style.width.%]="getStatusPercent('IN_PROGRESS')"></div>
+               <div class="bg-green-500 h-full" [style.width.%]="getStatusPercent('COMPLETED')"></div>
+            </div>
+          </div>
+          <div class="h-64 relative bg-slate-50/50 dark:bg-white/5 rounded-3xl p-4 border border-slate-100 dark:border-white/10">
+            <canvas #statusChart></canvas>
+          </div>
+        </div>
+
+        <!-- Priority Chart -->
+        <div class="space-y-4">
+          <div class="px-1 flex justify-between items-center">
+            <h4 class="text-xs font-black text-slate-800 dark:text-white uppercase tracking-wider">Priority Workload</h4>
+            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">By task count</span>
+          </div>
+          <div class="h-64 relative bg-slate-50/50 dark:bg-white/5 rounded-3xl p-4 border border-slate-100 dark:border-white/10">
+            <canvas #priorityChart></canvas>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- No data state -->
 </div>
