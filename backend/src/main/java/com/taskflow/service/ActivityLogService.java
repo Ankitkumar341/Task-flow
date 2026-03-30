@@ -59,12 +59,36 @@ public class ActivityLogService {
         activityLogRepository.save(entry);
     }
 
-    //   activity feed for the current user (max 20 entries)
-    public List<ActivityLogDTO> getFeedForCurrentUser() {
+    // activity feed: notificationsOnly ? (others' actions on my tasks) : (my history + others' actions)
+    public List<ActivityLogDTO> getFeedForCurrentUser(boolean notificationsOnly) {
         Long userId = getCurrentUserId();
-        List<ActivityLog> logs = activityLogRepository
-                .findByActorIdOrderByCreatedAtDesc(userId, PageRequest.of(0, 20));
-        return logs.stream().map(this::toDTO).collect(Collectors.toList());
+        
+        List<ActivityLog> logs;
+        if (notificationsOnly) {
+            // Notification Bell: Only others' actions on my tasks (assigned or created)
+            logs = activityLogRepository.findNotificationsForUser(userId, PageRequest.of(0, 20));
+        } else {
+            // Sidebar History: My actions + others' actions on tasks assigned to me
+            List<ActivityLog> ownLogs = activityLogRepository.findByActorIdOrderByCreatedAtDesc(userId, PageRequest.of(0, 20));
+            List<ActivityLog> assigneeLogs = activityLogRepository.findByTaskAssigneeId(userId, PageRequest.of(0, 20));
+
+            // Merge, deduplicate, sort, limit
+            java.util.Map<Long, ActivityLog> merged = new java.util.LinkedHashMap<>();
+            for (ActivityLog log : ownLogs) {
+                merged.put(log.getId(), log);
+            }
+            for (ActivityLog log : assigneeLogs) {
+                merged.put(log.getId(), log);
+            }
+            logs = merged.values().stream()
+                    .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                    .limit(20)
+                    .collect(Collectors.toList());
+        }
+
+        return logs.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     // Get activity feed by task.
