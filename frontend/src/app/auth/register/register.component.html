@@ -9,21 +9,25 @@
       <!-- Branding at the Top -->
       <div class="mb-12">
         <h1 class="text-6xl font-black mb-4 tracking-tighter text-white">TaskFlow</h1>
-        <p class="text-lg text-blue-100/80 font-medium">Enterprise Task Management</p>
+        <p class="text-lg text-blue-100/80 font-medium">Manage Your Task smoothly</p>
       </div>
 
       <!-- Created By Credit (Moved Below Branding) -->
       <div class="pt-8 border-t border-white/10">
         <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200/60 mb-4">Project Lead</p>
         <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-xl shadow-inner backdrop-blur-sm text-white">👨‍💻</div>
+          <div
+            class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center text-xl shadow-inner backdrop-blur-sm text-white">
+            👨‍💻</div>
           <div>
             <p class="text-base font-bold text-white tracking-tight">Ankit Kumar</p>
             <div class="flex gap-4 mt-1">
-              <a href="https://github.com/Ankitkumar341" target="_blank" class="text-xs font-semibold text-blue-200/60 hover:text-white transition-colors flex items-center gap-1.5 group">
+              <a href="https://github.com/Ankitkumar341" target="_blank"
+                class="text-xs font-semibold text-blue-200/60 hover:text-white transition-colors flex items-center gap-1.5 group">
                 <i class="bi bi-github group-hover:scale-110 transition-transform"></i> GitHub
               </a>
-              <a href="https://linkedin.com/in/ankitkumar341" target="_blank" class="text-xs font-semibold text-blue-200/60 hover:text-white transition-colors flex items-center gap-1.5 group">
+              <a href="https://linkedin.com/in/ankitkumar341" target="_blank"
+                class="text-xs font-semibold text-blue-200/60 hover:text-white transition-colors flex items-center gap-1.5 group">
                 <i class="bi bi-linkedin group-hover:scale-110 transition-transform"></i> LinkedIn
               </a>
             </div>
@@ -67,7 +71,7 @@
       <form (ngSubmit)="onSubmit()" #registerForm="ngForm" class="grid grid-cols-1 gap-5">
         <!-- Full Name -->
         <div class="space-y-2">
-          <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Full
+          <label class="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-[0.2em] px-1">Full
             Name</label>
           <div class="relative group">
             <span
@@ -83,7 +87,7 @@
 
         <!-- Email -->
         <div class="space-y-2">
-          <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Email
+          <label class="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-[0.2em] px-1">Email
             Address</label>
           <div class="relative group">
             <span
@@ -100,7 +104,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div class="space-y-2">
             <label
-              class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Role</label>
+              class="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-[0.2em] px-1">Role</label>
             <select name="role" [(ngModel)]="registerData.role"
               class="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium text-slate-700 dark:text-white appearance-none">
               <option value="DEVELOPER">Developer</option>
@@ -109,7 +113,7 @@
           </div>
           <div class="space-y-2">
             <label
-              class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Password</label>
+              class="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-[0.2em] px-1">Password</label>
             <div class="relative group">
               <input [type]="showPassword ? 'text' : 'password'" name="password" [(ngModel)]="registerData.password"
                 required minlength="8" #passwordInput="ngModel"
@@ -126,7 +130,7 @@
         <!-- Confirm Password -->
         <div class="space-y-2">
           <label
-            class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Confirm
+            class="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-[0.2em] px-1">Confirm
             Password</label>
           <div class="relative group">
             <span
