@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -9,6 +9,8 @@ import { HasRoleDirective } from '../directives/has-role.directive';
 import { AuthService } from '../services/auth.service';
 import { UserService } from '../services/user.service';
 import { User } from '../models/user.model';
+import { NotificationService } from '../services/notification.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-teams',
@@ -16,7 +18,7 @@ import { User } from '../models/user.model';
   imports: [CommonModule, FormsModule, RouterModule, HasRoleDirective],
   templateUrl: './teams.component.html'
 })
-export class TeamsComponent implements OnInit {
+export class TeamsComponent implements OnInit, OnDestroy {
   teams: Team[] = [];
   selectedTeam?: Team;
   selectedTeamAccess: 'private' | 'public' = 'private';
@@ -46,13 +48,15 @@ export class TeamsComponent implements OnInit {
   // Test helpers for live-reload verification
   testClicks = 0;
   testVisible = false;
+  private subs: Subscription[] = [];
 
   constructor(
     private teamService: TeamService,
     private toastService: ToastService,
     private router: Router,
     private authService: AuthService,
-    private userService: UserService
+    private userService: UserService,
+    private notificationService: NotificationService
   ) { }
 
   ngOnInit(): void {
@@ -60,6 +64,44 @@ export class TeamsComponent implements OnInit {
     this.isAdminOrManager = this.currentUserRole === 'ADMIN' || this.currentUserRole === 'MANAGER';
     this.loadTeams();
     this.loadUsers();
+
+    // Smooth Real-time synchronization
+    this.subs.push(
+      this.notificationService.taskUpdate$.subscribe((wsMsg) => {
+        const type = wsMsg.type;
+        const payload = wsMsg.payload || {};
+        const taskData = payload.taskData;
+        const teamId = taskData?.teamId || payload.teamId;
+
+        if (teamId) {
+          const team = this.teams.find(t => t.id === teamId);
+          if (team) {
+            console.log(`Smooth Sync (Teams): Updating task count for team ${team.name}`);
+            if (type === 'TASK_CREATED') {
+              team.activeTaskCount = (team.activeTaskCount || 0) + 1;
+              this.totalActiveTasks++;
+            } else if (type === 'TASK_DELETED') {
+              team.activeTaskCount = Math.max(0, (team.activeTaskCount || 0) - 1);
+              this.totalActiveTasks = Math.max(0, this.totalActiveTasks - 1);
+            } else if (type === 'TASK_UPDATED' && taskData) {
+              // If status changed to COMPLETED, it might no longer be 'active' in some views
+              // but activeTaskCount logic depends on how it's defined.
+              // For now, let's trigger a light reload of just this team's stats if needed
+              // or just keep it simple:
+              this.loadTeams(); // Fallback for complex state sync in Teams
+              return;
+            }
+            this.teams = [...this.teams]; // Trigger change detection
+          } else {
+            this.loadTeams(); // New team task might mean a team we didn't have?
+          }
+        }
+      })
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subs.forEach(s => s.unsubscribe());
   }
 
   // For debugging: force sample teams to ensure cards render regardless of API issues

@@ -16,6 +16,7 @@ import { Team } from '../../models/team.model';
 import { AnalyticsComponent } from '../../analytics/analytics.component';
 import { ActivityFeedComponent } from '../../activity-feed/activity-feed.component';
 import { CommentsComponent } from '../../comments/comments.component';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -123,7 +124,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private toastService: ToastService,
     private userService: UserService,
-    private teamService: TeamService
+    private teamService: TeamService,
+    private notificationService: NotificationService
   ) { }
 
   private resetDetailData(): void {
@@ -368,6 +370,40 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.canAssign) {
       this.loadUsers();
     }
+
+    // Smooth Real-time synchronization (WhatsApp style)
+    this.subs.push(
+      this.notificationService.taskUpdate$.subscribe((wsMsg) => {
+        const type = wsMsg.type;
+        const payload = wsMsg.payload || {};
+        const taskData = payload.taskData;
+
+        if (type === 'TASK_CREATED' && taskData) {
+          console.log('Smooth Sync: Adding new task locally');
+          if (!this.tasks.find(t => t.id === taskData.id)) {
+            this.tasks = [taskData, ...this.tasks];
+            this.applyFilter();
+          }
+        } else if (type === 'TASK_UPDATED' && taskData) {
+          console.log('Smooth Sync: Updating task locally');
+          const index = this.tasks.findIndex(t => t.id === taskData.id);
+          if (index !== -1) {
+            this.tasks[index] = { ...this.tasks[index], ...taskData };
+            this.tasks = [...this.tasks]; // Trigger change detection
+            this.applyFilter();
+          } else {
+            this.loadTasks(); // Refresh if not in current view but updated
+          }
+        } else if (type === 'TASK_DELETED') {
+          const taskId = payload.taskId;
+          if (taskId) {
+            console.log('Smooth Sync: Removing task locally');
+            this.tasks = this.tasks.filter(t => t.id !== taskId);
+            this.applyFilter();
+          }
+        }
+      })
+    );
   }
 
   loadTeams(): void {

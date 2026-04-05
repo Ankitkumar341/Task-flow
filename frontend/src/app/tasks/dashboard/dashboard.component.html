@@ -30,19 +30,19 @@
   <!-- Stats Grid — Stacks on mobile, 3 columns on tablet, 6 columns on large screens -->
   <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4" *ngIf="!isLoading">
     <div class="rounded-2xl shadow-sm p-4 text-center tf-stat-total transition-transform hover:scale-[1.02] cursor-default border border-slate-100 dark:border-white/5">
-      <div class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 px-1">Total Tasks</div>
+      <div class="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-widest mb-1.5 px-1">Total Tasks</div>
       <div class="text-3xl font-black text-slate-800 dark:text-white">{{ totalTasks }}</div>
     </div>
     <div class="rounded-2xl shadow-sm p-4 text-center tf-stat-todo transition-transform hover:scale-[1.02] cursor-default border border-slate-100 dark:border-white/5">
-      <div class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 px-1">To-Do</div>
+      <div class="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-widest mb-1.5 px-1">To-Do</div>
       <div class="text-3xl font-black text-slate-800 dark:text-white">{{ pendingTasks }}</div>
     </div>
     <div class="rounded-2xl shadow-sm p-4 text-center tf-stat-prog transition-transform hover:scale-[1.02] cursor-default border border-slate-100 dark:border-white/5">
-      <div class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 px-1">In Progress</div>
+      <div class="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-widest mb-1.5 px-1">In Progress</div>
       <div class="text-3xl font-black text-slate-800 dark:text-white">{{ inProgressTasks }}</div>
     </div>
     <div class="rounded-2xl shadow-sm p-4 text-center tf-stat-done transition-transform hover:scale-[1.02] cursor-default border border-slate-100 dark:border-white/5">
-      <div class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1.5 px-1">Completed</div>
+      <div class="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-widest mb-1.5 px-1">Completed</div>
       <div class="text-3xl font-black text-slate-800 dark:text-white">{{ completedTasks }}</div>
     </div>
     <div class="rounded-2xl shadow-sm p-4 text-center tf-stat-assigned transition-transform hover:scale-[1.02] cursor-default border border-slate-100 dark:border-white/5">
@@ -165,7 +165,7 @@
                 </div>
               </div>
 
-              <p class="text-[11px] font-medium text-slate-400 dark:text-slate-500 line-clamp-2 flex-grow">
+              <p class="text-[11px] font-medium text-slate-400 dark:text-slate-300 line-clamp-2 flex-grow">
                 {{ task.description || 'No description provided for this task.' }}
               </p>
 
@@ -200,6 +200,19 @@
                 </div>
 
                 <div class="flex items-center gap-2">
+                  <div *ngIf="canModifyDetails(task)" class="flex items-center gap-1.5 border-r border-slate-100 dark:border-white/5 pr-2 mr-1">
+                    <button class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-amber-100 dark:hover:bg-amber-500/20 text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 flex items-center justify-center transition-all active:scale-90"
+                            (click)="$event.stopPropagation(); openEditModal(task)"
+                            title="Edit Task">
+                      <i class="bi bi-pencil-square text-sm"></i>
+                    </button>
+                    <button class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 flex items-center justify-center transition-all active:scale-90"
+                            (click)="$event.stopPropagation(); confirmDelete(task.id!)"
+                            title="Delete Task">
+                      <i class="bi bi-trash text-sm"></i>
+                    </button>
+                  </div>
+
                   <div *ngIf="task.status !== 'COMPLETED'" class="group-hover:scale-110 transition-transform">
                     <button class="w-8 h-8 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/20 active:scale-90 transition-all"
                             (click)="$event.stopPropagation(); completeTask(task)"
@@ -224,7 +237,7 @@
           <i class="bi bi-inbox-fill text-4xl"></i>
         </div>
         <h5 class="text-sm font-black text-slate-800 dark:text-white uppercase tracking-[0.2em] mb-2">No tasks detected</h5>
-        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest max-w-xs mb-8">Try adjusting your filters or create a new assignment to see progress here.</p>
+        <p class="text-xs font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest max-w-xs mb-8">Try adjusting your filters or create a new assignment to see progress here.</p>
         <button (click)="openCreateModal()" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-blue-500/20 transition-all active:scale-95">
           Get Started
         </button>
@@ -270,7 +283,7 @@
       <!-- Left Panel (Metadata) -->
       <div class="w-full md:w-1/3 p-6 border-r border-slate-200 dark:border-white/5 space-y-6 overflow-y-auto">
         <div>
-          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 px-0.5">Status</label>
+          <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-widest mb-1.5 px-0.5">Status</label>
           <div class="flex items-center gap-2">
             <span [class]="getStatusBadgeClass(detailTask.status)" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase ring-1 ring-inset inline-block">
               {{ getStatusLabel(detailTask.status) }}

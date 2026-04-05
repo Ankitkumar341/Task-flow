@@ -2,7 +2,7 @@
 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
   <div>
     <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">TaskFlow Teams</h1>
-    <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mt-1">Manage & organize your workspace</p>
+    <p class="text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-[0.2em] mt-1">Manage & organize your workspace</p>
   </div>
   <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
     <button class="flex-1 sm:flex-none px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-white/5" 
@@ -34,20 +34,20 @@
 
 <!-- Summary Cards Grid -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8" *ngIf="!isSelectionMode">
-  <div class="p-4 rounded-2xl bg-green-50/50 dark:bg-green-500/5 border border-green-100 dark:border-green-500/10 text-center transition-transform hover:scale-[1.02]">
-    <p class="text-[9px] font-bold text-green-700/70 dark:text-green-400/60 uppercase tracking-widest mb-1.5">My Teams</p>
+  <div class="p-4 rounded-2xl bg-green-100/50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 text-center transition-transform hover:scale-[1.02] shadow-sm">
+    <p class="text-[9px] font-bold text-green-800 dark:text-green-400 uppercase tracking-widest mb-1.5">My Teams</p>
     <div class="text-2xl font-black text-slate-800 dark:text-white">{{ totalTeams }}</div>
   </div>
-  <div class="p-4 rounded-2xl bg-blue-50/50 dark:bg-blue-500/5 border border-blue-100 dark:border-blue-500/10 text-center transition-transform hover:scale-[1.02]">
-    <p class="text-[9px] font-bold text-blue-600/60 dark:text-blue-400/60 uppercase tracking-widest mb-1.5">Members</p>
+  <div class="p-4 rounded-2xl bg-blue-100/50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 text-center transition-transform hover:scale-[1.02] shadow-sm">
+    <p class="text-[9px] font-bold text-blue-800 dark:text-blue-400 uppercase tracking-widest mb-1.5">Members</p>
     <div class="text-2xl font-black text-slate-800 dark:text-white">{{ totalMembers }}</div>
   </div>
-  <div class="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-500/5 border border-amber-100 dark:border-amber-500/10 text-center transition-transform hover:scale-[1.02]">
-    <p class="text-[9px] font-bold text-amber-600/60 dark:text-amber-400/60 uppercase tracking-widest mb-1.5">Active Tasks</p>
+  <div class="p-4 rounded-2xl bg-amber-100/50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-center transition-transform hover:scale-[1.02] shadow-sm">
+    <p class="text-[9px] font-bold text-amber-800 dark:text-amber-400 uppercase tracking-widest mb-1.5">Active Tasks</p>
     <div class="text-2xl font-black text-slate-800 dark:text-white">{{ totalActiveTasks }}</div>
   </div>
-  <div class="p-4 rounded-2xl bg-red-50/50 dark:bg-red-500/5 border border-red-100 dark:border-red-500/10 text-center transition-transform hover:scale-[1.02]">
-    <p class="text-[9px] font-bold text-red-600/60 dark:text-red-400/60 uppercase tracking-widest mb-1.5">Inactive</p>
+  <div class="p-4 rounded-2xl bg-red-100/50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-center transition-transform hover:scale-[1.02] shadow-sm">
+    <p class="text-[9px] font-bold text-red-800 dark:text-red-400 uppercase tracking-widest mb-1.5">Inactive</p>
     <div class="text-2xl font-black text-slate-800 dark:text-white">{{ totalInactiveTeams }}</div>
   </div>
 </div>
@@ -70,16 +70,16 @@
 
     <div class="pt-2">
       <h3 class="font-black text-slate-800 dark:text-white truncate mb-1">{{ team.name }}</h3>
-      <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-4">
+      <div class="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase tracking-tighter mb-4">
         <i class="bi bi-calendar3"></i> {{ team.createdAt | date:'MMM dd, yy' }}
       </div>
 
       <div class="space-y-1 mb-5">
-        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-between">
+        <div class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex justify-between">
           <span>Manager</span>
           <span class="text-slate-700 dark:text-slate-300">{{ team.managerName || '—' }}</span>
         </div>
-        <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-between">
+        <div class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex justify-between">
           <span>Lead</span>
           <span class="text-slate-700 dark:text-slate-300 flex items-center gap-1">
             {{ getTeamLeadName(team) || '—' }}
@@ -127,7 +127,7 @@
   <div class="px-6 py-5 border-b border-slate-100 dark:border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
     <div>
       <h3 class="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">Team Members &mdash; {{ selectedTeam.name }}</h3>
-      <p class="text-[10px] font-bold text-slate-500 dark:text-slate-500 uppercase tracking-widest mt-0.5">{{ selectedTeam.members?.length || 0 }} users registered</p>
+      <p class="text-[10px] font-bold text-slate-500 dark:text-slate-300 uppercase tracking-widest mt-0.5">{{ selectedTeam.members?.length || 0 }} users registered</p>
     </div>
     <button class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-green-500/20 transition-all active:scale-95 flex items-center justify-center gap-2" 
             *ngIf="isAdminOrManager" (click)="isAddingMember = true">

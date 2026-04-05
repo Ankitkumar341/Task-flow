@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs';
 import { Client, IMessage } from '@stomp/stompjs';
 import { AuthService } from './auth.service';
 
@@ -22,10 +22,13 @@ export class NotificationService implements OnDestroy {
 
   private unreadCountSubject = new BehaviorSubject<number>(0);
   public unreadCount$ = this.unreadCountSubject.asObservable();
+  
+  public taskUpdate$ = new Subject<any>();
 
   private stompClient: Client | null = null;
   private authSubscription: Subscription;
   private readonly apiUrl = 'http://localhost:8080/api/activity';
+  private teamService: any; // Lazy assignment to avoid circular dep if any
 
   constructor(private authService: AuthService, private http: HttpClient) {
     this.authSubscription = this.authService.currentUser$.subscribe(user => {
@@ -94,24 +97,41 @@ export class NotificationService implements OnDestroy {
       reconnectDelay: 5000,
       onConnect: () => {
         console.log('Connected to WebSocket');
-        // Spring resolves /user/queue/... from authenticated principal
-        this.stompClient?.subscribe('/user/queue/notifications', (message: IMessage) => {
+        
+        const taskTypes = ['TASK_ASSIGNED', 'TASK_COMPLETED', 'TASK_DELETED', 'TASK_CREATED', 'TASK_UPDATED'];
+
+        const handleWebSocketMessage = (message: IMessage) => {
           const wsMsg = JSON.parse(message.body);
           const payload = wsMsg.payload || {};
           const type = wsMsg.type || '';
+          const initiatedBy = wsMsg.initiatedBy;
+          const currentUser = this.authService.getCurrentUser();
+
+          // Filter out redundant updates initiated by current user
+          if (initiatedBy && currentUser && initiatedBy === currentUser.email) {
+            console.log(`Skipping real-time update for ${type} as it was initiated by self.`);
+          } else if (taskTypes.includes(type)) {
+            console.log(`Real-time signal received: ${type}`);
+            this.taskUpdate$.next(wsMsg);
+          }
 
           let title = 'Notification';
           let notifType: 'info' | 'success' | 'warning' | 'error' = 'info';
 
           if (type === 'TASK_ASSIGNED') {
             title = '📋 Task Assigned';
-            notifType = 'info';
           } else if (type === 'TASK_COMPLETED') {
             title = '✅ Task Completed';
             notifType = 'success';
           } else if (type === 'TASK_DELETED') {
             title = '🗑️ Task Deleted';
             notifType = 'warning';
+          } else if (type === 'TASK_CREATED') {
+            title = '🆕 New Task';
+            notifType = 'info';
+          } else if (type === 'TASK_UPDATED') {
+            title = '🔄 Task Updated';
+            notifType = 'info';
           }
 
           this.addNotification({
@@ -119,6 +139,21 @@ export class NotificationService implements OnDestroy {
             message: payload.message || 'You have a new notification',
             type: notifType
           });
+        };
+
+        // 1. Subscribe to individual user notifications
+        this.stompClient?.subscribe('/user/queue/notifications', handleWebSocketMessage);
+
+        // 2. Subscribe to team topics if user has teams
+        // Note: Using direct inject pattern or simple HTTP to avoid complex circular dependencies if required
+        this.http.get<any[]>('http://localhost:8080/api/teams').subscribe({
+          next: (teams) => {
+            teams.forEach(team => {
+              console.log(`Subscribing to team topic: /topic/teams/${team.id}`);
+              this.stompClient?.subscribe(`/topic/teams/${team.id}`, handleWebSocketMessage);
+            });
+          },
+          error: (err) => console.error('Failed to subscribe to teams', err)
         });
       },
       onStompError: (frame) => {
