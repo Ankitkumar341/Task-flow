@@ -16,6 +16,9 @@ public class FirebaseConfig {
     @Value("${app.firebase.config-path:}")
     private String configPath;
 
+    @Value("${app.firebase.credentials-json:}")
+    private String credentialsJson;
+
     @Value("${app.firebase.project-id:}")
     private String projectId;
 
@@ -24,7 +27,13 @@ public class FirebaseConfig {
         try {
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseOptions options;
-                if (configPath != null && !configPath.isEmpty()) {
+                if (credentialsJson != null && !credentialsJson.trim().isEmpty()) {
+                    java.io.InputStream serviceAccount = new java.io.ByteArrayInputStream(credentialsJson.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                    options = FirebaseOptions.builder()
+                            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                            .setProjectId(projectId != null && !projectId.isEmpty() ? projectId : null)
+                            .build();
+                } else if (configPath != null && !configPath.isEmpty()) {
                     FileInputStream serviceAccount = new FileInputStream(configPath);
                     options = FirebaseOptions.builder()
                             .setCredentials(GoogleCredentials.fromStream(serviceAccount))
