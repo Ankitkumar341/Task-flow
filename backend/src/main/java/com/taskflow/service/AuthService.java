@@ -62,7 +62,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(role)
                 .memberType(memberType)
-                .isEmailVerified(true) // restored to true since there's no endpoint to manually verify
+                .isEmailVerified(false) // Changed to false: wait for Firebase verification
                 .isActive(true)
                 .build();
 
