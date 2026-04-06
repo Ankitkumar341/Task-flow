@@ -5,8 +5,10 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ToastService } from '../../services/toast.service';
 import { RegisterRequest } from '../../models/user.model';
-import { forkJoin, of } from 'rxjs';
+import { forkJoin, from, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { signInWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { auth } from '../../config/firebase.config';
 
 @Component({
   selector: 'app-register',
@@ -71,9 +73,8 @@ export class RegisterComponent {
     }).subscribe({
       next: (results) => {
         if (results.emailExists.exists) {
-          this.isLoading = false;
-          this.errorMessage = 'An account with this email already exists.';
-          this.toastService.error(this.errorMessage);
+          // Attempt to login to check if they are unverified
+          this.handleAlreadyExistsFallback(this.registerData.email, this.registerData.password);
           return;
         }
         if (results.usernameExists.exists) {
@@ -98,8 +99,12 @@ export class RegisterComponent {
             this.router.navigate(['/verify-email'], { state: { email: request.email } });
           },
           error: (err) => {
+            if (err.code === 'auth/email-already-in-use') {
+              this.handleAlreadyExistsFallback(this.registerData.email, this.registerData.password);
+              return;
+            }
             this.isLoading = false;
-            this.errorMessage = err.error?.message || 'Registration failed. Please try again.';
+            this.errorMessage = err.error?.message || err.message || 'Registration failed. Please try again.';
             this.toastService.error(this.errorMessage);
           }
         });
@@ -107,6 +112,38 @@ export class RegisterComponent {
       error: () => {
         this.isLoading = false;
         this.errorMessage = 'Server error during validation. Please try again later.';
+        this.toastService.error(this.errorMessage);
+      }
+    });
+  }
+
+  private handleAlreadyExistsFallback(email: string, password: string) {
+    from(signInWithEmailAndPassword(auth, email, password)).subscribe({
+      next: (userCredential) => {
+        const user = userCredential.user;
+        if (!user.emailVerified) {
+          // Send verification again!
+          from(sendEmailVerification(user)).subscribe({
+            next: () => {
+              this.isLoading = false;
+              this.toastService.success('Welcome back! You still need to verify your email. A new link has been sent!');
+              this.router.navigate(['/verify-email'], { state: { email } });
+            },
+            error: () => {
+              this.isLoading = false;
+              this.errorMessage = 'Could not send verification email. Please try again later.';
+              this.toastService.error(this.errorMessage);
+            }
+          });
+        } else {
+          this.isLoading = false;
+          this.errorMessage = 'This email is already registered and verified. Please login.';
+          this.toastService.error(this.errorMessage);
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = 'An account with this email already exists. Please login.';
         this.toastService.error(this.errorMessage);
       }
     });
